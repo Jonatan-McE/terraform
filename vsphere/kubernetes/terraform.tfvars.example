@@ -1,0 +1,71 @@
+
+vsphere_server_url          = 
+vsphere_datacenter          = 
+vsphere_cluster             = 
+vsphere_datastore           = 
+vsphere_network             = 
+vsphere_template            = 
+
+terraform_vsphere_username  = 
+terraform_vsphere_password  = 
+kubernetes_vsphere_username = 
+kubernetes_vsphere_password = 
+
+cluster_name           = 
+kubernetes_version     = "v1.15.9-rancher1-1"
+management_cluster     = true
+management_cluster_url = 
+management_cluster_certs = {
+    cert = <<-EOT
+        -----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----
+        EOT
+    key = <<-EOT
+        -----BEGIN PRIVATE KEY-----
+        ...
+        -----END PRIVATE KEY-----
+        EOT
+    ca = <<-EOT
+        -----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----
+        EOT
+}
+
+management_cluster_apikey = 
+
+management_cluster_nodes = {
+    k8s-rancher-01 = {
+        address   = "10.0.0.1"
+        netmask   = "24"
+        gateway   = "10.0.0.254"
+        dns       = ["8.8.8.8", "8.8..4."]
+        num_cpu   = 2
+        mem       = 4096
+        disk_size = 8
+        role      = ["controlplane", "worker", "etcd"]
+    }
+    k8s-rancher-02 = {
+        address   = "10.0.0.2"
+        netmask   = "24"
+        gateway   = "10.0.0.254"
+        dns       = ["8.8.8.8", "8.8..4."]
+        num_cpu   = 2
+        mem       = 4096
+        disk_size = 8
+        role      = ["controlplane", "worker", "etcd"]
+    }
+    k8s-rancher-03 = {
+        address   = "10.0.0.3"
+        netmask   = "24"
+        gateway   = "10.0.0.254"
+        dns       = ["8.8.8.8", "8.8..4."]
+        num_cpu   = 2
+        mem       = 4096
+        disk_size = 8
+        role      = ["controlplane", "worker", "etcd"]
+    }
+}
+
+management_cluster_admin_password = "admin"
