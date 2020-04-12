@@ -19,19 +19,9 @@ variable "client_cert" {
 variable "ca_crt" {
     type = string
 }
-variable "management_cluster" {
-  type = bool
-  default = false
-}
 variable "management_cluster_url" {
   type = string
 }
-variable "management_cluster_apikey" {
-  type = string
-}
-variable "management_cluster_certs" {
-  type = map(any)
-}
-variable "management_cluster_admin_password" {
+variable "management_cluster_token" {
   type = string
 }

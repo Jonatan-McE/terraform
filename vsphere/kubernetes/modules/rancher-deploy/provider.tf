@@ -24,9 +24,3 @@ provider "rancher2" {
   bootstrap = true
   insecure  = true
 }
-provider "rancher2" {
-  alias     = "admin"
-  api_url   = "https://${var.management_cluster_url}"
-  token_key = var.management_cluster_apikey
-  insecure  = true
-}

@@ -1,22 +1,5 @@
 # Variable set in credentials.tfvars
-variable "cluster_name" {
-  type = string
-}
-variable "management_cluster" {
-  type = bool
-}
-variable "management_cluster_url" {
-  type = string
-}
-variable "management_cluster_certs" {
-  type = map(any)
-}
-variable "management_cluster_apikey" {
-  type = string
-} 
-variable "kubernetes_version" {
-  type = string
-}
+
 variable "vsphere_server_url" {
   type = string
 }
@@ -47,9 +30,33 @@ variable "kubernetes_vsphere_username" {
 variable "kubernetes_vsphere_password" {
   type = string
 }
-variable "management_cluster_nodes" {
-  type = map(any)
+
+variable "kubernetes_version" {
+  type = string
+}
+
+
+variable "management_cluster_name" {
+  type = string
+}
+variable "management_cluster_url" {
+  type = string
 }
 variable "management_cluster_admin_password" {
   type = string
+}
+variable "management_cluster_certs" {
+  type = map(any)
+}
+variable "management_cluster_nodes" {
+  type = map(any)
+}
+
+
+
+variable "deployment_cluster_name" {
+  type = string
+}
+variable "deployment_cluster_nodes" {
+  type = map(any)
 }
