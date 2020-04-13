@@ -49,6 +49,6 @@ variable kubernetes_vsphere_password {
 }
 
 variable management_cluster {
-  type = bool
+  type    = bool
   default = false
 }
