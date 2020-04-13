@@ -12,7 +12,7 @@ resource "kubernetes_namespace" "cattle-system" {
   }
   metadata {
     name = "cattle-system"
-  } 
+  }
 }
 
 resource "kubernetes_secret" "ingress-secrets" {
@@ -22,12 +22,12 @@ resource "kubernetes_secret" "ingress-secrets" {
     ]
   }
   metadata {
-    name = "tls-rancher-ingress"
+    name      = "tls-rancher-ingress"
     namespace = "cattle-system"
   }
   data = {
-    "tls.crt" = var.management_cluster_certs.cert
-    "tls.key" = var.management_cluster_certs.key
+    "tls.crt" = var.management_certificates.cert
+    "tls.key" = var.management_certificates.key
   }
   type = "kubernetes.io/tls"
 }
@@ -39,35 +39,36 @@ resource "kubernetes_secret" "ca-secrets" {
     ]
   }
   metadata {
-    name = "tls-ca"
+    name      = "tls-ca"
     namespace = "cattle-system"
-  }  
-  data = {
-    "cacerts.pem" = var.management_cluster_certs.ca
   }
-}  
+  data = {
+    "cacerts.pem" = var.management_certificates.ca
+  }
+}
 
 resource "helm_release" "rancher" {
   name       = "rancher"
   repository = data.helm_repository.rancher.metadata[0].name
   chart      = "rancher"
-  namespace = "cattle-system"
+  namespace  = "cattle-system"
   set {
     name  = "hostname"
-    value =  var.management_cluster_url
+    value = var.management_url
   }
   set {
     name  = "ingress.tls.source"
     value = "secret"
   }
   set {
-      name = "privateCA"
-      value = true
+    name  = "privateCA"
+    value = true
   }
 }
 
 resource "rancher2_bootstrap" "bootstrap" {
   depends_on = [helm_release.rancher]
-  password  = var.management_cluster_admin_password
-  telemetry = false
+  provider   = rancher2.bootstrap
+  password   = var.management_default_password
+  telemetry  = false
 }

@@ -8,3 +8,10 @@ provider "vsphere" {
 
 provider "rke" {
 }
+
+provider "rancher2" {
+  alias     = "admin"
+  api_url   = "https://${var.management_url}"
+  token_key = var.management_api_token
+  insecure  = true
+}
