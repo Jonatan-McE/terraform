@@ -18,6 +18,14 @@ data "vsphere_virtual_machine" "template" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
+/*
+resource "vsphere_folder" "vm_folder" {
+  path          = "Kubernetes-Lab/${var.cluster_name}"
+  type          = "vm"
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+*/
+
 resource "vsphere_virtual_machine" "vm" {
   for_each         = var.cluster_nodes
   name             = each.key
@@ -101,10 +109,10 @@ resource rke_cluster "cluster" {
     name = "vsphere"
     vsphere_cloud_provider {
       disk {}
+      network {}
       global {
         insecure_flag = true
-      }
-      network {}
+      }      
       virtual_center {
         name        = var.vsphere_server_url
         user        = var.kubernetes_vsphere_username
@@ -113,7 +121,7 @@ resource rke_cluster "cluster" {
       }
       workspace {
         server            = var.vsphere_server_url
-        folder            = var.cluster_name
+        folder            = "kubernetes_${lower(var.cluster_name)}"
         default_datastore = var.vsphere_datastore
         datacenter        = var.vsphere_datacenter
       }
@@ -152,6 +160,11 @@ data "http" "cluster_import_manifest" {
 resource "local_file" "kube_cluster_import_yaml" {
   depends_on = [data.http.cluster_import_manifest]
   count      = var.management_cluster ? 0 : 1
+  lifecycle {
+    ignore_changes = [
+      content
+    ]
+  }
   filename   = ".kube/kubeconfig_${var.cluster_name}_cluster_import_manifest.yml"
   content    = data.http.cluster_import_manifest[0].body
 }

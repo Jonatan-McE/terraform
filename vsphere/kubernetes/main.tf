@@ -26,12 +26,12 @@ module "kubernetes-management-instance-deploy" {
   management_url              = var.management_url
   management_certificates     = var.management_certificates
   management_default_password = var.management_default_password
-  rke_api_server_url          = module.kubernetes-management-cluster-deploy.rke_api_server_url
-  rke_kube_admin_user         = module.kubernetes-management-cluster-deploy.rke_kube_admin_user
-  rke_client_key              = module.kubernetes-management-cluster-deploy.rke_client_key
-  rke_client_cert             = module.kubernetes-management-cluster-deploy.rke_client_cert
-  rke_ca_crt                  = module.kubernetes-management-cluster-deploy.rke_ca_crt
-  rke_kubeconfig_filename     = module.kubernetes-management-cluster-deploy.rke_kubeconfig_filename
+  rke-cluster_api_server_url          = module.kubernetes-management-cluster-deploy.rke-cluster_api_server_url
+  rke-cluster_kube_admin_user         = module.kubernetes-management-cluster-deploy.rke-cluster_kube_admin_user
+  rke-cluster_client_key              = module.kubernetes-management-cluster-deploy.rke-cluster_client_key
+  rke-cluster_client_cert             = module.kubernetes-management-cluster-deploy.rke-cluster_client_cert
+  rke-cluster_ca_crt                  = module.kubernetes-management-cluster-deploy.rke-cluster_ca_crt
+  rke-cluster_kubeconfig_filename     = module.kubernetes-management-cluster-deploy.rke-cluster_kubeconfig_filename
 }
 
 module "kubernetes-application-cluster-deploy" {
@@ -52,4 +52,18 @@ module "kubernetes-application-cluster-deploy" {
   terraform_vsphere_password  = var.terraform_vsphere_password
   kubernetes_vsphere_username = var.kubernetes_vsphere_username
   kubernetes_vsphere_password = var.kubernetes_vsphere_password
+}
+
+
+module "kubernetes-argo-bootstrap" {
+  source                      = "./modules/argo"
+  
+  argo_bootstrap              = var.argo_bootstrap
+  argo_bootstrap_config       = var.argo_bootstrap_config
+  cluster_name                = var.management_cluster_name
+  rke-cluster_api_server_url          = module.kubernetes-management-cluster-deploy.rke-cluster_api_server_url
+  rke-cluster_kube_admin_user         = module.kubernetes-management-cluster-deploy.rke-cluster_kube_admin_user
+  rke-cluster_client_key              = module.kubernetes-management-cluster-deploy.rke-cluster_client_key
+  rke-cluster_client_cert             = module.kubernetes-management-cluster-deploy.rke-cluster_client_cert
+  rke-cluster_ca_crt                  = module.kubernetes-management-cluster-deploy.rke-cluster_ca_crt
 }
