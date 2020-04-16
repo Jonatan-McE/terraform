@@ -41,9 +41,9 @@ resource "helm_release" "argocd" {
     ]
   }
   name       = "argocd"
-  chart      = "argo/argo-cd"
-  // repository = data.helm_repository.argocd.metadata[0].url
-  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  repository = data.helm_repository.argocd.metadata[0].url
+  // repository = "https://argoproj.github.io/argo-helm"
   namespace  = kubernetes_namespace.argo-namespace.metadata[0].name
     values = [templatefile(
     "${path.module}/argo-bootstrap-values.yaml.tmpl", {
