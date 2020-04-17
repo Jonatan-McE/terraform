@@ -19,3 +19,9 @@ provider "helm" {
     load_config_file       = false
   }
 }
+provider "rancher2" {
+  version   = "1.8.3"
+  api_url   = "https://${var.management_url}"
+  token_key = var.management_api_token
+  insecure  = true
+}

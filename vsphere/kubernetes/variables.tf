@@ -58,9 +58,6 @@ variable "application_cluster_nodes" {
   type = map(any)
 }
 
-variable "argo_bootstrap" {
-  type = map(string)
-}
-variable "argo_bootstrap_config" {
+variable "argocd" {
   type = map(string)
 }

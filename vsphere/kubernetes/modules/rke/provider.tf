@@ -11,7 +11,6 @@ provider "rke" {
 
 provider "rancher2" {
   version   = "1.8.3"
-  alias     = "admin"
   api_url   = "https://${var.management_url}"
   token_key = var.management_api_token
   insecure  = true

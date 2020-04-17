@@ -5,23 +5,23 @@ server:
   ingress: 
     enabled: true
     hosts:
-      - argo.${bootstrap_environment}.k8s.littleglitch.com
+      - argo.${cluster_name}.k8s.littleglitch.com
   config:
-    url: argo.${bootstrap_environment}.k8s.littleglitch.com
+    url: argo.${cluster_name}.k8s.littleglitch.com
     repositories: |
-      - url: https://github.com/Jonatan-McE/argo-bootstrap.git
+      - url: ${bootstrap_repository}
         passwordSecret:
-          name: argo-bootstrap
+          name: argocd
           key: password
         usernameSecret:
-          name: argo-bootstrap
+          name: argocd
           key: username
   additionalApplications:
   - name: bootstrap
     namespace: ${bootstrap_namespace}
     project: default
     source:
-      repoURL: https://github.com/Jonatan-McE/argo-bootstrap.git
+      repoURL: ${bootstrap_repository}
       targetRevision: ${bootstrap_branch}
       path: ${bootstrap_path}
       helm:
@@ -32,7 +32,7 @@ server:
             destination:
               server: https://kubernetes.default.svc
             source:
-              repoURL: https://github.com/Jonatan-McE/argo-bootstrap
+              repoURL: ${bootstrap_repository}
               targetRevision: ${bootstrap_branch} 
     destination:
       server: https://kubernetes.default.svc

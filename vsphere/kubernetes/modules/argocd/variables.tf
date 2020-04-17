@@ -1,11 +1,15 @@
 variable "cluster_name" {
   type = string
 }
-variable "argo_bootstrap" {
+variable "argocd" {
   type = map(string)
 }
-variable "argo_bootstrap_config" {
-  type = map(string)
+
+variable "management_url" {
+  type = string
+}
+variable "management_api_token" {
+  type = string
 }
 
 variable "rke-cluster_api_server_url" {

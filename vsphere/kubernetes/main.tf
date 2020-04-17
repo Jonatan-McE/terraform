@@ -56,14 +56,15 @@ module "kubernetes-application-cluster-deploy" {
 
 
 module "kubernetes-argo-bootstrap" {
-  source                      = "./modules/argo"
+  source                      = "./modules/argocd"
   
-  argo_bootstrap              = var.argo_bootstrap
-  argo_bootstrap_config       = var.argo_bootstrap_config
+  argocd                      = var.argocd
   cluster_name                = var.application_cluster_name
-  rke-cluster_api_server_url          = module.kubernetes-application-cluster-deploy.rke-cluster_api_server_url
-  rke-cluster_kube_admin_user         = module.kubernetes-application-cluster-deploy.rke-cluster_kube_admin_user
-  rke-cluster_client_key              = module.kubernetes-application-cluster-deploy.rke-cluster_client_key
-  rke-cluster_client_cert             = module.kubernetes-application-cluster-deploy.rke-cluster_client_cert
-  rke-cluster_ca_crt                  = module.kubernetes-application-cluster-deploy.rke-cluster_ca_crt
+  management_url              = var.management_url
+  management_api_token        = module.kubernetes-management-instance-deploy.token
+  rke-cluster_api_server_url  = module.kubernetes-application-cluster-deploy.rke-cluster_api_server_url
+  rke-cluster_kube_admin_user = module.kubernetes-application-cluster-deploy.rke-cluster_kube_admin_user
+  rke-cluster_client_key      = module.kubernetes-application-cluster-deploy.rke-cluster_client_key
+  rke-cluster_client_cert     = module.kubernetes-application-cluster-deploy.rke-cluster_client_cert
+  rke-cluster_ca_crt          = module.kubernetes-application-cluster-deploy.rke-cluster_ca_crt
 }

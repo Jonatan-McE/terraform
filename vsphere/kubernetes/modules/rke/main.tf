@@ -138,7 +138,6 @@ resource "local_file" "kube_cluster_yaml" {
 // Import non-managment cluster
 resource "rancher2_cluster" "cluster_import" {
   count    = var.management_cluster ? 0 : 1
-  provider = rancher2.admin
   lifecycle {
     ignore_changes = [
       annotations
