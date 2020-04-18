@@ -27,3 +27,8 @@ variable "rke-cluster_client_cert" {
 variable "rke-cluster_ca_crt" {
   type = string
 }
+
+variable "dependencies" {
+  type    = list
+  default = []
+}

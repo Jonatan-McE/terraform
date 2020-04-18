@@ -81,7 +81,7 @@ resource rke_cluster "cluster" {
   services {
     kube_api {
       service_cluster_ip_range = "172.16.0.0/18"
-      pod_security_policy      = true
+      pod_security_policy      = false
     }
     kube_controller {
       cluster_cidr             = "172.16.64.0/18"
@@ -136,6 +136,7 @@ resource "local_file" "kube_cluster_yaml" {
 
 
 // Import non-managment cluster
+
 resource "rancher2_cluster" "cluster_import" {
   count    = var.management_cluster ? 0 : 1
   lifecycle {
@@ -146,7 +147,7 @@ resource "rancher2_cluster" "cluster_import" {
   name        = lower(var.cluster_name)
   description = "${var.cluster_name}-Cluster"
   annotations = {
-    "capabilities/pspEnabled" = "true"
+    "capabilities/pspEnabled" = "false"
   }
 }
 
@@ -174,4 +175,11 @@ resource "null_resource" "cluster_import" {
   provisioner "local-exec" {
     command = "kubectl --kubeconfig ${abspath(local_file.kube_cluster_yaml.filename)} --insecure-skip-tls-verify apply -f ${abspath(local_file.kube_cluster_import_yaml[0].filename)} "
   }
+}
+
+resource "null_resource" "dependency_setter" {
+  count      = var.management_cluster ? 0 : 1
+  depends_on = [
+    null_resource.cluster_import,
+  ]
 }

@@ -3,15 +3,24 @@ data "helm_repository" "argocd" {
   url  = "https://argoproj.github.io/argo-helm"
 }
 
+resource "null_resource" "dependency_getter" {
+  provisioner "local-exec" {
+    command = "echo ${length(var.dependencies)}"
+  }
+}
+
 data "rancher2_cluster" "cluster" {
+  depends_on    = [null_resource.dependency_getter]
   name = lower(var.cluster_name)
 }
 
 resource "rancher2_project" "argocd" {
   cluster_id = data.rancher2_cluster.cluster.id
-  name = "Argocd"
+  wait_for_cluster = true
+  name = "Argo"
   description = "Argo-cd deplyment project"
-  pod_security_policy_template_id = "unrestricted"
+  // pod_security_policy_template_id = "unrestricted"
+  
 }
 
 resource "kubernetes_namespace" "argocd" {

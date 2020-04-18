@@ -16,3 +16,6 @@ output "rke-cluster_ca_crt" {
 output "rke-cluster_kubeconfig_filename" {
   value = abspath(local_file.kube_cluster_yaml.filename)
 }
+output "depended_on" {
+  value = length(null_resource.dependency_setter) > 0 ? null_resource.dependency_setter[0].id : ""
+}

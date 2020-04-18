@@ -1,6 +1,6 @@
 data "helm_repository" "rancher" {
-  name = "stable"
-  url  = "https://releases.rancher.com/server-charts/stable"
+  name = "latest"
+  url  = "https://releases.rancher.com/server-charts/latest"
 }
 
 resource "kubernetes_namespace" "cattle-system" {
@@ -71,4 +71,10 @@ resource "rancher2_bootstrap" "bootstrap" {
   provider   = rancher2.bootstrap
   password   = var.management_default_password
   telemetry  = false
+}
+
+resource "null_resource" "dependency_setter" {
+  depends_on = [
+    rancher2_bootstrap.bootstrap,
+  ]
 }
