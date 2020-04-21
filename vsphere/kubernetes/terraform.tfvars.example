@@ -1,134 +1,152 @@
 
-vsphere_server_url =
-vsphere_datacenter =
-vsphere_cluster    =
-vsphere_datastore  =
-vsphere_network    =
-vsphere_template   =
+kubernetes_version = "v1.15.9-rancher1-1"
 
-terraform_vsphere_username  =
-terraform_vsphere_password  =
-kubernetes_vsphere_username =
-kubernetes_vsphere_password =
+vsphere = {
+  server_url = ""
+  datacenter = ""
+  cluster    = ""
+  datastore  = ""
+  network    = ""
+  template   = ""
+}
 
-kubernetes_version          = "v1.15.9-rancher1-1"
-management_url              =
-management_default_password =
+vsphere_credentials = {
+  terraform_username  = ""
+  terraform_password  = ""
+  kubernetes_username = ""
+  kubernetes_password = ""
+}
 
-// Management cluster settings
-management_cluster_name = "Managment"
-management_cluster_nodes = {
-  k8s-mgmt-01 = {
-    address   = "10.0.0.21"
-    netmask   = "24"
-    gateway   = "10.0.0.254"
-    dns       = ["10.0.0.10", "10.0.0.11"]
-    num_cpu   = 2
-    mem       = 4096
-    disk_size = 16
-    role      = ["controlplane", "worker", "etcd"]
+
+management_api = {
+  url              = { 
+    value = "api.k8s.example.com"
   }
-  k8s-mgmt-02 = {
-    address   = "10.0.0.22"
-    netmask   = "24"
-    gateway   = "10.0.0.254"
-    dns       = ["10.0.0.10", "10.0.0.11"]
-    num_cpu   = 2
-    mem       = 4096
-    disk_size = 16
-    role      = ["controlplane", "worker", "etcd"]
+  default-password = {
+    value = "admin"
   }
-  k8s-mgmt-03 = {
-    address   = "10.0.0.23"
-    netmask   = "24"
-    gateway   = "10.0.0.254"
-    dns       = ["10.0.0.10", "10.0.0.11"]
-    num_cpu   = 2
-    mem       = 4096
-    disk_size = 16
-    role      = ["controlplane", "worker", "etcd"]
+  certificates = {
+    cert = <<-EOT
+          -----BEGIN CERTIFICATE-----
+          
+          -----END CERTIFICATE-----
+          EOT
+    key  = <<-EOT
+          -----BEGIN PRIVATE KEY-----
+          
+          -----END PRIVATE KEY-----
+          EOT
+    ca   = <<-EOT
+          -----BEGIN CERTIFICATE-----
+          
+          -----END CERTIFICATE-----
+          EOT
   }
 }
+// Management cluster settings
+management_cluster_name = "Management"
+management_cluster_settings = {
+  nodes = {
+    k8s-mgmt-01 = {
+      address   = "10.0.0.21"
+      netmask   = "24"
+      gateway   = "10.40.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 6144
+      disk_size = 16
+      role      = ["controlplane", "worker", "etcd"]
+    }
+    k8s-mgmt-02 = {
+      address   = "10.0.0.22"
+      netmask   = "24"
+      gateway   = "10.40.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 6144
+      disk_size = 16
+      role      = ["controlplane", "worker", "etcd"]
+    }
+    k8s-mgmt-03 = {
+      address   = "10.0.0.23"
+      netmask   = "24"
+      gateway   = "10.40.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 6144
+      disk_size = 16
+      role      = ["controlplane", "worker", "etcd"]
+    }
+  }
+}
+
 
 // Application cluster settings
 application_cluster_name = "App01"
-application_cluster_nodes = {
-  k8s-app01-01 = {
-    address   = "10.0.0.25"
-    netmask   = "24"
-    gateway   = "10.0.0.254"
-    dns       = ["10.0.0.10", "10.0.0.11"]
-    num_cpu   = 2
-    mem       = 4096
-    disk_size = 16
-    role      = ["controlplane", "worker", "etcd"]
-  }
-  k8s-app01-02 = {
-    address   = "10.0.0.26"
-    netmask   = "24"
-    gateway   = "10.0.0.254"
-    dns       = ["10.0.0.10", "10.0.0.11"]
-    num_cpu   = 2
-    mem       = 4096
-    disk_size = 16
-    role      = ["controlplane", "worker", "etcd"]
-  }
-  k8s-app01-03 = {
-    address   = "10.0.0.27"
-    netmask   = "24"
-    gateway   = "10.0.0.254"
-    dns       = ["10.0.0.10", "10.0.0.11"]
-    num_cpu   = 2
-    mem       = 4096
-    disk_size = 16
-    role      = ["controlplane", "worker", "etcd"]
-  }
-  k8s-app01-04 = {
-    address   = "10.0.0.28"
-    netmask   = "24"
-    gateway   = "10.0.0.254"
-    dns       = ["10.0.0.10", "10.0.0.11"]
-    num_cpu   = 2
-    mem       = 4096
-    disk_size = 24
-    role      = ["worker"]
-  }
-  k8s-app01-05 = {
-    address   = "10.0.0.29"
-    netmask   = "24"
-    gateway   = "10.0.0.254"
-    dns       = ["10.0.0.10", "10.0.0.11"]
-    num_cpu   = 2
-    mem       = 4096
-    disk_size = 24
-    role      = ["worker"]
+application_cluster_settings = {
+  nodes = {
+    k8s-app01-01 = {
+      address   = "10.0.0.25"
+      netmask   = "24"
+      gateway   = "10.40.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 4096
+      disk_size = 16
+      role      = ["controlplane", "worker", "etcd"]
+    }
+    k8s-app01-02 = {
+      address   = "10.0.0.26"
+      netmask   = "24"
+      gateway   = "10.40.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 4096
+      disk_size = 16
+      role      = ["controlplane", "worker", "etcd"]
+    }
+    k8s-app01-03 = {
+      address   = "10.0.0.27"
+      netmask   = "24"
+      gateway   = "10.40.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 4096
+      disk_size = 16
+      role      = ["controlplane", "worker", "etcd"]
+    }
+    k8s-app01-04 = {
+      address   = "10.0.0.28"
+      netmask   = "24"
+      gateway   = "10.40.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 4096
+      disk_size = 24
+      role      = ["worker"]
+    }
+    k8s-app01-05 = {
+      address   = "10.0.0.29"
+      netmask   = "24"
+      gateway   = "10.40.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 4096
+      disk_size = 24
+      role      = ["worker"]
+    }
   }
 }
 
-argocd = {
-    username =
-    password =
-    bootstrap_path = "bootstrap"
-    bootstrap_namespace = "argocd"
-    bootstrap_branch = "master"
-    bootstrap_environment = "production"
-    bootstrap_repository =
+argocd_settings = {
+  namespace                 = "argocd"
+  environment               = "production"
+  git_username              = ""
+  git_password              = ""
+  git_repository            = ""
+  git_path                  = "bootstrap"
+  git_branch                = "master"
 }
 
-management_certificates = {
-  cert = <<-EOT
-        -----BEGIN CERTIFICATE-----
-       
-        -----END CERTIFICATE-----
-        EOT
-  key  = <<-EOT
-        -----BEGIN PRIVATE KEY-----
-        
-        -----END PRIVATE KEY-----
-        EOT
-  ca   = <<-EOT
-        -----BEGIN CERTIFICATE-----
 
-        -----END CERTIFICATE-----
-        EOT
-}
+

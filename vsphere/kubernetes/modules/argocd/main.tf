@@ -4,13 +4,13 @@ data "helm_repository" "argocd" {
 }
 
 data "rancher2_cluster" "cluster" {
-  depends_on    = [null_resource.dependency_getter]
-  name = lower(var.cluster_name)
+  depends_on = [null_resource.dependency_getter]
+  name       = lower(var.cluster_name)
 }
 
 data "rancher2_project" "system" {
-    cluster_id = data.rancher2_cluster.cluster.id
-    name = "System"
+  cluster_id = data.rancher2_cluster.cluster.id
+  name       = "System"
 }
 
 resource "null_resource" "dependency_getter" {
@@ -31,7 +31,7 @@ resource "kubernetes_namespace" "argocd" {
     annotations = {
       "field.cattle.io/projectId" = "${data.rancher2_project.system.id}"
     }
-    name = var.argocd.bootstrap_namespace
+    name = var.argocd_settings.namespace
   }
 }
 
@@ -46,8 +46,8 @@ resource "kubernetes_secret" "argocd" {
     namespace = kubernetes_namespace.argocd.metadata[0].name
   }
   data = {
-    username = var.argocd.username
-    password = var.argocd.password
+    username = var.argocd_settings.git_username
+    password = var.argocd_settings.git_password
   }
 }
 
@@ -63,11 +63,11 @@ resource "helm_release" "argocd" {
   namespace  = kubernetes_namespace.argocd.metadata[0].name
   values = [templatefile(
     "${path.module}/argocd-bootstrap-values.yaml.tmpl", {
-      bootstrap_path          = var.argocd.bootstrap_path,
-      bootstrap_branch        = var.argocd.bootstrap_branch,
-      bootstrap_environment   = var.argocd.bootstrap_environment,
-      bootstrap_namespace     = var.argocd.bootstrap_namespace,
-      bootstrap_repository    = var.argocd.bootstrap_repository,
-      cluster_name            = lower(var.cluster_name)
+      cluster_name          = lower(var.cluster_name)
+      namespace             = var.argocd_settings.namespace,
+      environment           = var.argocd_settings.environment,
+      git_repository        = var.argocd_settings.git_repository,
+      git_path              = var.argocd_settings.git_path,
+      git_branch            = var.argocd_settings.git_branch,
   })]
 }

@@ -1,20 +1,20 @@
 data "vsphere_datacenter" "dc" {
-  name = var.vsphere_datacenter
+  name = var.vsphere.datacenter
 }
 data "vsphere_compute_cluster" "cluster" {
-  name          = var.vsphere_cluster
+  name          = var.vsphere.cluster
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 data "vsphere_datastore" "datastore" {
-  name          = var.vsphere_datastore
+  name          = var.vsphere.datastore
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 data "vsphere_network" "network" {
-  name          = var.vsphere_network
+  name          = var.vsphere.network
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 data "vsphere_virtual_machine" "template" {
-  name          = var.vsphere_template
+  name          = var.vsphere.template
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
@@ -27,7 +27,7 @@ resource "vsphere_folder" "vm_folder" {
 */
 
 resource "vsphere_virtual_machine" "vm" {
-  for_each         = var.cluster_nodes
+  for_each         = var.cluster_settings.nodes
   name             = each.key
   num_cpus         = each.value.num_cpu
   memory           = each.value.mem
@@ -70,7 +70,7 @@ resource rke_cluster "cluster" {
   kubernetes_version = var.kubernetes_version
   addon_job_timeout  = 300
   dynamic "nodes" {
-    for_each = var.cluster_nodes
+    for_each = var.cluster_settings.nodes
     content {
       address = nodes.value.address
       role    = nodes.value.role
@@ -112,18 +112,18 @@ resource rke_cluster "cluster" {
       network {}
       global {
         insecure_flag = true
-      }      
+      }
       virtual_center {
-        name        = var.vsphere_server_url
-        user        = var.kubernetes_vsphere_username
-        password    = var.kubernetes_vsphere_password
-        datacenters = var.vsphere_datacenter
+        name        = var.vsphere.server_url
+        user        = var.vsphere_credentials.kubernetes_username
+        password    = var.vsphere_credentials.kubernetes_password
+        datacenters = var.vsphere.datacenter
       }
       workspace {
-        server            = var.vsphere_server_url
+        server            = var.vsphere.server_url
         folder            = "kubernetes_${lower(var.cluster_name)}"
-        default_datastore = var.vsphere_datastore
-        datacenter        = var.vsphere_datacenter
+        default_datastore = var.vsphere.datastore
+        datacenter        = var.vsphere.datacenter
       }
     }
   }
@@ -138,7 +138,7 @@ resource "local_file" "kube_cluster_yaml" {
 // Import non-managment cluster
 
 resource "rancher2_cluster" "cluster_import" {
-  count    = var.management_cluster ? 0 : 1
+  count = var.management ? 0 : 1
   lifecycle {
     ignore_changes = [
       annotations
@@ -153,32 +153,32 @@ resource "rancher2_cluster" "cluster_import" {
 
 data "http" "cluster_import_manifest" {
   depends_on = [rancher2_cluster.cluster_import]
-  count      = var.management_cluster ? 0 : 1
+  count      = var.management ? 0 : 1
   url        = rancher2_cluster.cluster_import[0].cluster_registration_token[0].manifest_url
 }
 
 resource "local_file" "kube_cluster_import_yaml" {
   depends_on = [data.http.cluster_import_manifest]
-  count      = var.management_cluster ? 0 : 1
+  count      = var.management ? 0 : 1
   lifecycle {
     ignore_changes = [
       content
     ]
   }
-  filename   = ".kube/kubeconfig_${var.cluster_name}_cluster_import_manifest.yml"
-  content    = data.http.cluster_import_manifest[0].body
+  filename = ".kube/kubeconfig_${var.cluster_name}_cluster_import_manifest.yml"
+  content  = data.http.cluster_import_manifest[0].body
 }
 
 resource "null_resource" "cluster_import" {
   depends_on = [rancher2_cluster.cluster_import, data.http.cluster_import_manifest]
-  count      = var.management_cluster ? 0 : 1
+  count      = var.management ? 0 : 1
   provisioner "local-exec" {
     command = "kubectl --kubeconfig ${abspath(local_file.kube_cluster_yaml.filename)} --insecure-skip-tls-verify apply -f ${abspath(local_file.kube_cluster_import_yaml[0].filename)} "
   }
 }
 
 resource "null_resource" "dependency_setter" {
-  count      = var.management_cluster ? 0 : 1
+  count = var.management ? 0 : 1
   depends_on = [
     null_resource.cluster_import,
   ]

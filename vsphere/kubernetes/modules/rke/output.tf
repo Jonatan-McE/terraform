@@ -1,21 +1,15 @@
-output "rke-cluster_api_server_url" {
-  value = rke_cluster.cluster.api_server_url
-}
-output "rke-cluster_kube_admin_user" {
-  value = rke_cluster.cluster.kube_admin_user
-}
-output "rke-cluster_client_key" {
-  value = rke_cluster.cluster.client_key
-}
-output "rke-cluster_client_cert" {
-  value = rke_cluster.cluster.client_cert
-}
-output "rke-cluster_ca_crt" {
-  value = rke_cluster.cluster.ca_crt
-}
-output "rke-cluster_kubeconfig_filename" {
-  value = abspath(local_file.kube_cluster_yaml.filename)
-}
+
 output "depended_on" {
   value = length(null_resource.dependency_setter) > 0 ? null_resource.dependency_setter[0].id : ""
+}
+
+output "rke" {
+  value = {
+    api_server_url      = rke_cluster.cluster.api_server_url
+    kube_admin_user     = rke_cluster.cluster.kube_admin_user
+    client_key          = rke_cluster.cluster.client_key
+    client_cert         = rke_cluster.cluster.client_cert
+    ca_crt              = rke_cluster.cluster.ca_crt
+    kubeconfig_filename = abspath(local_file.kube_cluster_yaml.filename)
+  }
 }

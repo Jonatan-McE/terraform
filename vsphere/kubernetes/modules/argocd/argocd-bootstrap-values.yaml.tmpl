@@ -1,15 +1,30 @@
 installCRDs: false
+
 dex:
   enabled: false
+
 server:
+
   ingress: 
     enabled: true
+    annotations: 
+      # This annotations adds should be replaced with "ssl-passthrough" to allow both gRPC/HTTPS.
+      nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      # This annotations allows both gRPC/HTTPS on the same ingress but requires 
+      # "--enable-ssl-passthrough" to be added to the running nginx ingress controller.
+      # nginx.ingress.kubernetes.io/ssl-passthrough: true
     hosts:
       - argo.${cluster_name}.k8s.littleglitch.com
+    paths:
+      - /
+    tls:
+      - hosts:
+        - argo.${cluster_name}.k8s.littleglitch.com
+
   config:
     url: argo.${cluster_name}.k8s.littleglitch.com
     repositories: |
-      - url: ${bootstrap_repository}
+      - url: ${git_repository}
         passwordSecret:
           name: argocd
           key: password
@@ -18,29 +33,29 @@ server:
           key: username
   additionalApplications:
   - name: bootstrap
-    namespace: ${bootstrap_namespace}
+    namespace: ${namespace}
     project: default
     source:
-      repoURL: ${bootstrap_repository}
-      targetRevision: ${bootstrap_branch}
-      path: ${bootstrap_path}
+      repoURL: ${git_repository}
+      targetRevision: ${git_branch}
+      path: ${git_path}
       helm:
         values: |-
           cluster: ${cluster_name}
-          environment: ${bootstrap_environment}
+          environment: ${environment}
           spec:
             destination:
               server: https://kubernetes.default.svc
             source:
-              repoURL: ${bootstrap_repository}
-              targetRevision: ${bootstrap_branch} 
+              repoURL: ${git_repository}
+              targetRevision: ${git_branch} 
     destination:
       server: https://kubernetes.default.svc
-      namespace: ${bootstrap_namespace}
+      namespace: ${namespace}
     syncPolicy:
       automated:
         prune: true
-      selfHeal: false
+        selfHeal: false
 
 repoServer:
   volumes:
