@@ -1,25 +1,33 @@
 data "vsphere_datacenter" "dc" {
-  name = var.vsphere_datacenter
+  name = var.vsphere_settings.datacenter
 }
 data "vsphere_compute_cluster" "cluster" {
-  name          = var.vsphere_cluster
+  name          = var.vsphere_settings.cluster
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 data "vsphere_datastore" "datastore" {
-  name          = var.vsphere_datastore
+  name          = var.vsphere_settings.datastore
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 data "vsphere_network" "network" {
-  name          = var.vsphere_network
+  name          = var.vsphere_settings.network
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 data "vsphere_virtual_machine" "template" {
-  name          = var.vsphere_template
+  name          = var.vsphere_settings.template
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
+/*
+resource "vsphere_folder" "vm_folder" {
+  path          = "Kubernetes-Lab/${var.cluster_name}"
+  type          = "vm"
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+*/
+
 resource "vsphere_virtual_machine" "vm" {
-  for_each         = var.cluster_nodes
+  for_each         = var.cluster_settings.nodes
   name             = each.key
   num_cpus         = each.value.num_cpu
   memory           = each.value.mem
@@ -62,7 +70,7 @@ resource rke_cluster "cluster" {
   kubernetes_version = var.kubernetes_version
   addon_job_timeout  = 300
   dynamic "nodes" {
-    for_each = var.cluster_nodes
+    for_each = var.cluster_settings.nodes
     content {
       address = nodes.value.address
       role    = nodes.value.role
@@ -73,7 +81,7 @@ resource rke_cluster "cluster" {
   services {
     kube_api {
       service_cluster_ip_range = "172.16.0.0/18"
-      pod_security_policy      = true
+      pod_security_policy      = false
     }
     kube_controller {
       cluster_cidr             = "172.16.64.0/18"
@@ -101,21 +109,21 @@ resource rke_cluster "cluster" {
     name = "vsphere"
     vsphere_cloud_provider {
       disk {}
+      network {}
       global {
         insecure_flag = true
       }
-      network {}
       virtual_center {
-        name        = var.vsphere_server_url
-        user        = var.kubernetes_vsphere_username
-        password    = var.kubernetes_vsphere_password
-        datacenters = var.vsphere_datacenter
+        name        = var.vsphere_settings.server_url
+        user        = var.vsphere_credentials.kubernetes_username
+        password    = var.vsphere_credentials.kubernetes_password
+        datacenters = var.vsphere_settings.datacenter
       }
       workspace {
-        server            = var.vsphere_server_url
-        folder            = var.cluster_name
-        default_datastore = var.vsphere_datastore
-        datacenter        = var.vsphere_datacenter
+        server            = var.vsphere_settings.server_url
+        folder            = "kubernetes_${lower(var.cluster_name)}"
+        default_datastore = var.vsphere_settings.datastore
+        datacenter        = var.vsphere_settings.datacenter
       }
     }
   }
@@ -127,39 +135,35 @@ resource "local_file" "kube_cluster_yaml" {
 }
 
 
-// Import non-managment cluster
-resource "rancher2_cluster" "cluster_import" {
-  count    = var.management_cluster ? 0 : 1
-  provider = rancher2.admin
-  lifecycle {
-    ignore_changes = [
-      annotations
-    ]
-  }
-  name        = lower(var.cluster_name)
-  description = "${var.cluster_name}-Cluster"
-  annotations = {
-    "capabilities/pspEnabled" = "true"
-  }
+
+module "cluster-import" {
+  source = "../cluster_import"
+
+  cluster_name          = var.cluster_name
+  kube_cluster_yaml     = abspath(local_file.kube_cluster_yaml.filename)
+  management            = var.management
+  management_api        = var.management_api
+  management_api_token  = var.management_api_token
 }
 
-data "http" "cluster_import_manifest" {
-  depends_on = [rancher2_cluster.cluster_import]
-  count      = var.management_cluster ? 0 : 1
-  url        = rancher2_cluster.cluster_import[0].cluster_registration_token[0].manifest_url
-}
 
-resource "local_file" "kube_cluster_import_yaml" {
-  depends_on = [data.http.cluster_import_manifest]
-  count      = var.management_cluster ? 0 : 1
-  filename   = ".kube/kubeconfig_${var.cluster_name}_cluster_import_manifest.yml"
-  content    = data.http.cluster_import_manifest[0].body
-}
+module "argocd-deploy" {
+  source = "../argocd"
 
-resource "null_resource" "cluster_import" {
-  depends_on = [rancher2_cluster.cluster_import, data.http.cluster_import_manifest]
-  count      = var.management_cluster ? 0 : 1
-  provisioner "local-exec" {
-    command = "kubectl --kubeconfig ${abspath(local_file.kube_cluster_yaml.filename)} --insecure-skip-tls-verify apply -f ${abspath(local_file.kube_cluster_import_yaml[0].filename)} "
+  cluster_name         = var.cluster_name
+  argocd_settings      = var.argocd_settings
+  management           = var.management
+  management_api       = var.management_api
+  management_api_token = var.management_api_token
+  rke                  = {
+    api_server_url      = rke_cluster.cluster.api_server_url
+    kube_admin_user     = rke_cluster.cluster.kube_admin_user
+    client_key          = rke_cluster.cluster.client_key
+    client_cert         = rke_cluster.cluster.client_cert
+    ca_crt              = rke_cluster.cluster.ca_crt
+    kubeconfig_filename = abspath(local_file.kube_cluster_yaml.filename)
   }
+  dependencies = [
+    module.cluster-import.depended_on,
+  ]
 }
