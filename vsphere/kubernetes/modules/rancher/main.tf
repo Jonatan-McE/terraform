@@ -73,8 +73,11 @@ resource "rancher2_bootstrap" "bootstrap" {
   telemetry  = false
 }
 
+/*
 resource "null_resource" "dependency_setter" {
   depends_on = [
     rancher2_bootstrap.bootstrap,
   ]
 }
+*/
+

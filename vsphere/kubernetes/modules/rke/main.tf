@@ -1,20 +1,20 @@
 data "vsphere_datacenter" "dc" {
-  name = var.vsphere.datacenter
+  name = var.vsphere_settings.datacenter
 }
 data "vsphere_compute_cluster" "cluster" {
-  name          = var.vsphere.cluster
+  name          = var.vsphere_settings.cluster
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 data "vsphere_datastore" "datastore" {
-  name          = var.vsphere.datastore
+  name          = var.vsphere_settings.datastore
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 data "vsphere_network" "network" {
-  name          = var.vsphere.network
+  name          = var.vsphere_settings.network
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 data "vsphere_virtual_machine" "template" {
-  name          = var.vsphere.template
+  name          = var.vsphere_settings.template
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
@@ -114,16 +114,16 @@ resource rke_cluster "cluster" {
         insecure_flag = true
       }
       virtual_center {
-        name        = var.vsphere.server_url
+        name        = var.vsphere_settings.server_url
         user        = var.vsphere_credentials.kubernetes_username
         password    = var.vsphere_credentials.kubernetes_password
-        datacenters = var.vsphere.datacenter
+        datacenters = var.vsphere_settings.datacenter
       }
       workspace {
-        server            = var.vsphere.server_url
+        server            = var.vsphere_settings.server_url
         folder            = "kubernetes_${lower(var.cluster_name)}"
-        default_datastore = var.vsphere.datastore
-        datacenter        = var.vsphere.datacenter
+        default_datastore = var.vsphere_settings.datastore
+        datacenter        = var.vsphere_settings.datacenter
       }
     }
   }
@@ -135,51 +135,35 @@ resource "local_file" "kube_cluster_yaml" {
 }
 
 
-// Import non-managment cluster
 
-resource "rancher2_cluster" "cluster_import" {
-  count = var.management ? 0 : 1
-  lifecycle {
-    ignore_changes = [
-      annotations
-    ]
-  }
-  name        = lower(var.cluster_name)
-  description = "${var.cluster_name}-Cluster"
-  annotations = {
-    "capabilities/pspEnabled" = "false"
-  }
+module "cluster-import" {
+  source = "../cluster_import"
+
+  cluster_name          = var.cluster_name
+  kube_cluster_yaml     = abspath(local_file.kube_cluster_yaml.filename)
+  management            = var.management
+  management_api        = var.management_api
+  management_api_token  = var.management_api_token
 }
 
-data "http" "cluster_import_manifest" {
-  depends_on = [rancher2_cluster.cluster_import]
-  count      = var.management ? 0 : 1
-  url        = rancher2_cluster.cluster_import[0].cluster_registration_token[0].manifest_url
-}
 
-resource "local_file" "kube_cluster_import_yaml" {
-  depends_on = [data.http.cluster_import_manifest]
-  count      = var.management ? 0 : 1
-  lifecycle {
-    ignore_changes = [
-      content
-    ]
+module "argocd-deploy" {
+  source = "../argocd"
+
+  cluster_name         = var.cluster_name
+  argocd_settings      = var.argocd_settings
+  management           = var.management
+  management_api       = var.management_api
+  management_api_token = var.management_api_token
+  rke                  = {
+    api_server_url      = rke_cluster.cluster.api_server_url
+    kube_admin_user     = rke_cluster.cluster.kube_admin_user
+    client_key          = rke_cluster.cluster.client_key
+    client_cert         = rke_cluster.cluster.client_cert
+    ca_crt              = rke_cluster.cluster.ca_crt
+    kubeconfig_filename = abspath(local_file.kube_cluster_yaml.filename)
   }
-  filename = ".kube/kubeconfig_${var.cluster_name}_cluster_import_manifest.yml"
-  content  = data.http.cluster_import_manifest[0].body
-}
-
-resource "null_resource" "cluster_import" {
-  depends_on = [rancher2_cluster.cluster_import, data.http.cluster_import_manifest]
-  count      = var.management ? 0 : 1
-  provisioner "local-exec" {
-    command = "kubectl --kubeconfig ${abspath(local_file.kube_cluster_yaml.filename)} --insecure-skip-tls-verify apply -f ${abspath(local_file.kube_cluster_import_yaml[0].filename)} "
-  }
-}
-
-resource "null_resource" "dependency_setter" {
-  count = var.management ? 0 : 1
-  depends_on = [
-    null_resource.cluster_import,
+  dependencies = [
+    module.cluster-import.depended_on,
   ]
 }

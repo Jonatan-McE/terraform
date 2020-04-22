@@ -2,6 +2,7 @@
 variable "kubernetes_version" {
   type = string
 }
+
 variable "management" {
   type = bool
   default = false
@@ -22,10 +23,14 @@ variable "management_api_token" {
 }
 
 
-variable "vsphere" {
+variable "vsphere_settings" {
   type = map(string)
 }
 
 variable "vsphere_credentials" {
+  type = map(string)
+}
+
+variable "argocd_settings" {
   type = map(string)
 }

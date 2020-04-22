@@ -1,50 +1,35 @@
 
-module "kubernetes-management-cluster-deploy" {
+module "deploy-management-cluster" {
   source = "./modules/rke/"
 
   kubernetes_version   = var.kubernetes_version
   management           = true
   cluster_name         = "Management"
-  cluster_settings     = var.management_cluster_settings
+  cluster_settings     = var.cluster_settings_management
   management_api       = var.management_api
-  management_api_token = ""
-  vsphere              = var.vsphere
+  management_api_token = module.deploy-rancher.token
+  vsphere_settings     = var.vsphere_settings
   vsphere_credentials  = var.vsphere_credentials
+  argocd_settings      = var.argocd_settings
 }
 
-
-module "kubernetes-rancher-deploy" {
-  source = "./modules/rancher"
-
-  management_api = var.management_api
-  rke            = module.kubernetes-management-cluster-deploy.rke
-}
-
-module "kubernetes-application-cluster-deploy" {
+module "deploy-application-cluster" {
   source = "./modules/rke/"
 
   kubernetes_version   = var.kubernetes_version
   management           = false
   cluster_name         = "App01"
-  cluster_settings     = var.application_cluster_settings
+  cluster_settings     = var.cluster_settings_application
   management_api       = var.management_api
-  management_api_token = module.kubernetes-rancher-deploy.token
-  vsphere              = var.vsphere
+  management_api_token = module.deploy-rancher.token
+  vsphere_settings     = var.vsphere_settings
   vsphere_credentials  = var.vsphere_credentials
+  argocd_settings      = var.argocd_settings
 }
 
+module "deploy-rancher" {
+  source = "./modules/rancher"
 
-module "kubernetes-argo-deploy" {
-  source = "./modules/argocd"
-
-  cluster_name         = "App01"
-  argocd_settings      = var.argocd_settings
-  management_api       = var.management_api
-  management_api_token = module.kubernetes-rancher-deploy.token
-  rke                  = module.kubernetes-application-cluster-deploy.rke
-
-  dependencies = [
-    module.kubernetes-rancher-deploy.depended_on,
-    module.kubernetes-application-cluster-deploy.depended_on,
-  ]
+  management_api = var.management_api
+  rke            = module.deploy-management-cluster.rke
 }

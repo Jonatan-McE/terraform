@@ -18,7 +18,6 @@ provider "helm" {
     load_config_file       = false
   }
 }
-
 provider "rancher2" {
   version   = "1.8.3"
   alias     = "bootstrap"

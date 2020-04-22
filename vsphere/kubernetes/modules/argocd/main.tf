@@ -1,26 +1,30 @@
 data "helm_repository" "argocd" {
+  count      = var.management ? 0 : 1
   name = "argocd"
   url  = "https://argoproj.github.io/argo-helm"
 }
 
 data "rancher2_cluster" "cluster" {
+  count      = var.management ? 0 : 1
   depends_on = [null_resource.dependency_getter]
   name       = lower(var.cluster_name)
 }
 
 data "rancher2_project" "system" {
-  cluster_id = data.rancher2_cluster.cluster.id
+  count      = var.management ? 0 : 1
+  cluster_id = data.rancher2_cluster.cluster[0].id
   name       = "System"
 }
 
 resource "null_resource" "dependency_getter" {
+  count      = var.management ? 0 : 1
   provisioner "local-exec" {
     command = "echo ${length(var.dependencies)}"
   }
 }
 
-
 resource "kubernetes_namespace" "argocd" {
+  count      = var.management ? 0 : 1
   lifecycle {
     ignore_changes = [
       metadata[0].annotations,
@@ -29,13 +33,14 @@ resource "kubernetes_namespace" "argocd" {
   }
   metadata {
     annotations = {
-      "field.cattle.io/projectId" = "${data.rancher2_project.system.id}"
+      "field.cattle.io/projectId" = "${data.rancher2_project.system[0].id}"
     }
     name = var.argocd_settings.namespace
   }
 }
 
 resource "kubernetes_secret" "argocd" {
+  count      = var.management ? 0 : 1
   lifecycle {
     ignore_changes = [
       metadata[0].annotations
@@ -43,7 +48,7 @@ resource "kubernetes_secret" "argocd" {
   }
   metadata {
     name      = "argocd"
-    namespace = kubernetes_namespace.argocd.metadata[0].name
+    namespace = kubernetes_namespace.argocd[0].metadata[0].name
   }
   data = {
     username = var.argocd_settings.git_username
@@ -52,6 +57,7 @@ resource "kubernetes_secret" "argocd" {
 }
 
 resource "helm_release" "argocd" {
+  count      = var.management ? 0 : 1
   lifecycle {
     ignore_changes = [
       metadata[0]
@@ -59,8 +65,8 @@ resource "helm_release" "argocd" {
   }
   name       = "argocd"
   chart      = "argo-cd"
-  repository = data.helm_repository.argocd.metadata[0].url
-  namespace  = kubernetes_namespace.argocd.metadata[0].name
+  repository = data.helm_repository.argocd[0].metadata[0].url
+  namespace  = kubernetes_namespace.argocd[0].metadata[0].name
   values = [templatefile(
     "${path.module}/argocd-values.yaml.tmpl", {
       cluster_name          = lower(var.cluster_name)
