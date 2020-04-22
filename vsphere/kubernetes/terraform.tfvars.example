@@ -42,7 +42,23 @@ management_api = {
           -----END CERTIFICATE-----
           EOT
   }
+  okta = {
+    metadata = <<-EOT
+          ...
+          EOT
+  }
 }
+
+argocd_settings = {
+  namespace                 = "argocd"
+  environment               = "production"
+  git_username              = ""
+  git_password              = ""
+  git_repository            = ""
+  git_path                  = "bootstrap"
+  git_branch                = "master"
+}
+
 // Management cluster settings
 management_cluster_name = "Management"
 management_cluster_settings = {
@@ -138,15 +154,7 @@ application_cluster_settings = {
   }
 }
 
-argocd_settings = {
-  namespace                 = "argocd"
-  environment               = "production"
-  git_username              = ""
-  git_password              = ""
-  git_repository            = ""
-  git_path                  = "bootstrap"
-  git_branch                = "master"
-}
+
 
 
 

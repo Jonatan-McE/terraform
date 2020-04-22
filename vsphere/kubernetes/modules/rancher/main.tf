@@ -73,6 +73,18 @@ resource "rancher2_bootstrap" "bootstrap" {
   telemetry  = false
 }
 
+resource "rancher2_auth_config_okta" "okta" {
+  depends_on = [rancher2_bootstrap.bootstrap]
+  provider   = rancher2.admin
+  display_name_field = "displayName"
+  groups_field = "groups"
+  idp_metadata_content = var.management_api.okta.metadata
+  rancher_api_host = "https://${var.management_api.url.value}"
+  sp_cert = var.management_api.certificates.cert
+  sp_key = var.management_api.certificates.key
+  uid_field = "uid"
+  user_name_field = "userName"
+}
 /*
 resource "null_resource" "dependency_setter" {
   depends_on = [

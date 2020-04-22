@@ -25,3 +25,10 @@ provider "rancher2" {
   bootstrap = true
   insecure  = true
 }
+provider "rancher2" {
+  version   = "1.8.3"
+  alias     = "admin"
+  api_url   = "https://${var.management_api.url.value}"
+  token_key = rancher2_bootstrap.bootstrap.token
+  insecure  = true
+}

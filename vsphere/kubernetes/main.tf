@@ -1,4 +1,11 @@
 
+module "deploy-rancher" {
+  source = "./modules/rancher"
+
+  management_api = var.management_api
+  rke            = module.deploy-management-cluster.rke
+}
+
 module "deploy-management-cluster" {
   source = "./modules/rke/"
 
@@ -13,13 +20,13 @@ module "deploy-management-cluster" {
   argocd_settings      = var.argocd_settings
 }
 
-module "deploy-application-cluster" {
+module "deploy-private-cluster" {
   source = "./modules/rke/"
 
   kubernetes_version   = var.kubernetes_version
   management           = false
-  cluster_name         = "App01"
-  cluster_settings     = var.cluster_settings_application
+  cluster_name         = "Private"
+  cluster_settings     = var.cluster_settings_private
   management_api       = var.management_api
   management_api_token = module.deploy-rancher.token
   vsphere_settings     = var.vsphere_settings
@@ -27,9 +34,4 @@ module "deploy-application-cluster" {
   argocd_settings      = var.argocd_settings
 }
 
-module "deploy-rancher" {
-  source = "./modules/rancher"
 
-  management_api = var.management_api
-  rke            = module.deploy-management-cluster.rke
-}

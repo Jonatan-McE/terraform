@@ -23,7 +23,7 @@ variable "argocd_settings" {
 variable "cluster_settings_management" {
   type = map(any)
 }
-variable "cluster_settings_application" {
+variable "cluster_settings_private" {
   type = map(any)
 }
 
