@@ -26,4 +26,6 @@ variable "cluster_settings_management" {
 variable "cluster_settings_private" {
   type = map(any)
 }
-
+variable "cluster_settings_public" {
+  type = map(any)
+}

@@ -34,4 +34,17 @@ module "deploy-private-cluster" {
   argocd_settings      = var.argocd_settings
 }
 
+module "deploy-public-cluster" {
+  source = "./modules/rke/"
+
+  kubernetes_version   = var.kubernetes_version
+  management           = false
+  cluster_name         = "Public"
+  cluster_settings     = var.cluster_settings_public
+  management_api       = var.management_api
+  management_api_token = module.deploy-rancher.token
+  vsphere_settings     = var.vsphere_settings
+  vsphere_credentials  = var.vsphere_credentials
+  argocd_settings      = var.argocd_settings
+}
 
