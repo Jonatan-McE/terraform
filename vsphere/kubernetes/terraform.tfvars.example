@@ -60,33 +60,32 @@ argocd_settings = {
 }
 
 // Management cluster settings
-management_cluster_name = "Management"
-management_cluster_settings = {
+cluster_settings_management = {
   nodes = {
-    k8s-mgmt-01 = {
+    k8s-mgmt-cont-01 = {
       address   = "10.0.0.21"
       netmask   = "24"
-      gateway   = "10.40.0.254"
+      gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
       num_cpu   = 2
       mem       = 6144
       disk_size = 16
       role      = ["controlplane", "worker", "etcd"]
     }
-    k8s-mgmt-02 = {
+    k8s-mgmt-cont-02 = {
       address   = "10.0.0.22"
       netmask   = "24"
-      gateway   = "10.40.0.254"
+      gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
       num_cpu   = 2
       mem       = 6144
       disk_size = 16
       role      = ["controlplane", "worker", "etcd"]
     }
-    k8s-mgmt-03 = {
+    k8s-mgmt-cont-03 = {
       address   = "10.0.0.23"
       netmask   = "24"
-      gateway   = "10.40.0.254"
+      gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
       num_cpu   = 2
       mem       = 6144
@@ -97,54 +96,43 @@ management_cluster_settings = {
 }
 
 
-// Application cluster settings
-application_cluster_name = "App01"
-application_cluster_settings = {
+// Private cluster settings
+cluster_settings_private = {
   nodes = {
-    k8s-app01-01 = {
+    k8s-private-cont-01 = {
       address   = "10.0.0.25"
       netmask   = "24"
-      gateway   = "10.40.0.254"
+      gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
       num_cpu   = 2
       mem       = 4096
       disk_size = 16
       role      = ["controlplane", "worker", "etcd"]
     }
-    k8s-app01-02 = {
+    k8s-private-cont-02 = {
       address   = "10.0.0.26"
       netmask   = "24"
-      gateway   = "10.40.0.254"
+      gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
       num_cpu   = 2
       mem       = 4096
       disk_size = 16
       role      = ["controlplane", "worker", "etcd"]
     }
-    k8s-app01-03 = {
+    k8s-private-cont-03 = {
       address   = "10.0.0.27"
       netmask   = "24"
-      gateway   = "10.40.0.254"
+      gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
       num_cpu   = 2
       mem       = 4096
       disk_size = 16
       role      = ["controlplane", "worker", "etcd"]
     }
-    k8s-app01-04 = {
+    k8s-private-work-01 = {
       address   = "10.0.0.28"
       netmask   = "24"
-      gateway   = "10.40.0.254"
-      dns       = ["10.0.0.10", "10.0.0.11"]
-      num_cpu   = 2
-      mem       = 4096
-      disk_size = 24
-      role      = ["worker"]
-    }
-    k8s-app01-05 = {
-      address   = "10.0.0.29"
-      netmask   = "24"
-      gateway   = "10.40.0.254"
+      gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
       num_cpu   = 2
       mem       = 4096
@@ -157,4 +145,48 @@ application_cluster_settings = {
 
 
 
-
+// Public cluster settings
+cluster_settings_public = {
+  nodes = {
+    k8s-public-cont-01 = {
+      address   = "10.0.0.29"
+      netmask   = "24"
+      gateway   = "10.0.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 4096
+      disk_size = 16
+      role      = ["controlplane", "worker", "etcd"]
+    }
+    k8s-public-cont-02 = {
+      address   = "10.40.0.250"
+      netmask   = "24"
+      gateway   = "10.0.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 4096
+      disk_size = 16
+      role      = ["controlplane", "worker", "etcd"]
+    }
+    k8s-public-cont-03 = {
+      address   = "10.40.0.251"
+      netmask   = "24"
+      gateway   = "10.0.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 4096
+      disk_size = 16
+      role      = ["controlplane", "worker", "etcd"]
+    }
+    k8s-public-work-01 = {
+      address   = "10.40.0.252"
+      netmask   = "24"
+      gateway   = "10.0.0.254"
+      dns       = ["10.0.0.10", "10.0.0.11"]
+      num_cpu   = 2
+      mem       = 4096
+      disk_size = 16
+      role      = ["worker"]
+    }
+  }
+}
