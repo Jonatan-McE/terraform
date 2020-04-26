@@ -68,7 +68,7 @@ resource "helm_release" "argocd" {
   repository = data.helm_repository.argocd[0].metadata[0].url
   namespace  = kubernetes_namespace.argocd[0].metadata[0].name
   values = [templatefile(
-    "${path.module}/argocd-values.yaml.tmpl", {
+    "${path.module}/argocd-values.tmpl.yaml", {
       cluster_name          = lower(var.cluster_name)
       namespace             = var.argocd_settings.namespace,
       environment           = var.argocd_settings.environment,

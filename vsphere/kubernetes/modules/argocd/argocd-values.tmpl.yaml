@@ -38,7 +38,7 @@ server:
     source:
       repoURL: ${git_repository}
       targetRevision: ${git_branch}
-      path: ${git_path}
+      path: ${cluster_name}
       helm:
         values: |-
           cluster: ${cluster_name}
