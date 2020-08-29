@@ -34,3 +34,8 @@ variable "vsphere_credentials" {
 variable "argocd_settings" {
   type = map(string)
 }
+
+variable "dependencies" {
+  type    = list
+  default = []
+}

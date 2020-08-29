@@ -85,11 +85,11 @@ resource "rancher2_auth_config_okta" "okta" {
   uid_field = "uid"
   user_name_field = "userName"
 }
-/*
+
 resource "null_resource" "dependency_setter" {
   depends_on = [
     rancher2_bootstrap.bootstrap,
   ]
 }
-*/
+
 

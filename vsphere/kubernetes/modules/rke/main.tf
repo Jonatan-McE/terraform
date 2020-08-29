@@ -1,3 +1,4 @@
+// Create VM's to host the RKE kubernetes instance in
 data "vsphere_datacenter" "dc" {
   name = var.vsphere_settings.datacenter
 }
@@ -17,14 +18,6 @@ data "vsphere_virtual_machine" "template" {
   name          = var.vsphere_settings.template
   datacenter_id = data.vsphere_datacenter.dc.id
 }
-
-/*
-resource "vsphere_folder" "vm_folder" {
-  path          = "Kubernetes-Lab/${var.cluster_name}"
-  type          = "vm"
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-*/
 
 resource "vsphere_virtual_machine" "vm" {
   for_each         = var.cluster_settings.nodes
@@ -64,6 +57,7 @@ resource "vsphere_virtual_machine" "vm" {
   }
 }
 
+// Create RKE kubernets clusters
 resource rke_cluster "cluster" {
   depends_on         = [vsphere_virtual_machine.vm]
   cluster_name       = var.cluster_name
@@ -135,18 +129,46 @@ resource "local_file" "kube_cluster_yaml" {
 }
 
 
-
-module "cluster-import" {
-  source = "../cluster_import"
-
-  cluster_name          = var.cluster_name
-  kube_cluster_yaml     = abspath(local_file.kube_cluster_yaml.filename)
-  management            = var.management
-  management_api        = var.management_api
-  management_api_token  = var.management_api_token
+// Import any non-management rke clusters into rancher (management system)
+resource "null_resource" "dependency_getter" {
+  count      = var.management ? 0 : 1
+  provisioner "local-exec" {
+    command = "echo ${length(var.dependencies)}"
+  }
 }
 
+resource "rancher2_cluster" "cluster_import" {
+  depends_on = [null_resource.dependency_getter]
+  count = var.management ? 0 : 1
+  lifecycle {
+    ignore_changes = [
+      annotations
+    ]
+  }
+  name        = lower(var.cluster_name)
+  description = "${var.cluster_name}-Cluster"
+  annotations = {
+    "capabilities/pspEnabled" = "false"
+  }
+}
 
+resource "null_resource" "cluster_import" {
+  depends_on = [local_file.kube_cluster_yaml, rancher2_cluster.cluster_import]
+  count      = var.management ? 0 : 1
+  provisioner "local-exec" {
+    command = "kubectl --kubeconfig ${abspath(local_file.kube_cluster_yaml.filename)} --insecure-skip-tls-verify apply -f ${rancher2_cluster.cluster_import[0].cluster_registration_token[0].manifest_url} "
+  }
+}
+/*
+resource "null_resource" "dependency_setter" {
+  count = var.management ? 0 : 1
+  depends_on = [
+    null_resource.cluster_import
+  ]
+}
+*/
+
+// Deploy argo-cd to any non-management clusters
 module "argocd-deploy" {
   source = "../argocd"
 
@@ -163,7 +185,7 @@ module "argocd-deploy" {
     ca_crt              = rke_cluster.cluster.ca_crt
     kubeconfig_filename = abspath(local_file.kube_cluster_yaml.filename)
   }
-  dependencies = [
-    module.cluster-import.depended_on,
-  ]
+
+  dependencies = length(null_resource.cluster_import) > 0 ? [null_resource.cluster_import[0].id,] : ["",]
+
 }

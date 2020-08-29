@@ -32,6 +32,10 @@ module "deploy-private-cluster" {
   vsphere_settings     = var.vsphere_settings
   vsphere_credentials  = var.vsphere_credentials
   argocd_settings      = var.argocd_settings
+  
+  dependencies = [
+    module.deploy-rancher.depended_on
+  ] 
 }
 
 module "deploy-public-cluster" {
@@ -46,5 +50,8 @@ module "deploy-public-cluster" {
   vsphere_settings     = var.vsphere_settings
   vsphere_credentials  = var.vsphere_credentials
   argocd_settings      = var.argocd_settings
+ 
+  dependencies = [
+    module.deploy-rancher.depended_on
+  ] 
 }
-
