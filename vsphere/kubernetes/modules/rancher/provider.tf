@@ -1,5 +1,4 @@
 provider "kubernetes" {
-  version                = "1.11.1"
   host                   = var.rke.api_server_url
   username               = var.rke.kube_admin_user
   client_key             = var.rke.client_key
@@ -8,7 +7,6 @@ provider "kubernetes" {
   load_config_file       = false
 }
 provider "helm" {
-  version = "1.1.1"
   kubernetes {
     host                   = var.rke.api_server_url
     username               = var.rke.kube_admin_user
@@ -19,14 +17,12 @@ provider "helm" {
   }
 }
 provider "rancher2" {
-  version   = "1.8.3"
   alias     = "bootstrap"
   api_url   = "https://${var.management_api.url.value}"
   bootstrap = true
   insecure  = true
 }
 provider "rancher2" {
-  version   = "1.8.3"
   alias     = "admin"
   api_url   = "https://${var.management_api.url.value}"
   token_key = rancher2_bootstrap.bootstrap.token

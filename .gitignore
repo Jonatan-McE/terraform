@@ -1,6 +1,7 @@
 .kube
 .apikeys
 .terraform
+.logs
 .terraform.tfstate.lock.info
 terraform.tfvars
 terraform.tfstate*

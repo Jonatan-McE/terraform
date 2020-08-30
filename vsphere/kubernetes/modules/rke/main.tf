@@ -95,31 +95,9 @@ resource rke_cluster "cluster" {
     provider = "nginx"
   }
   upgrade_strategy {
-    drain                        = false
+    drain                        = true
     max_unavailable_controlplane = "1"
-    max_unavailable_worker       = "10%"
-  }
-  cloud_provider {
-    name = "vsphere"
-    vsphere_cloud_provider {
-      disk {}
-      network {}
-      global {
-        insecure_flag = true
-      }
-      virtual_center {
-        name        = var.vsphere_settings.server_url
-        user        = var.vsphere_credentials.kubernetes_username
-        password    = var.vsphere_credentials.kubernetes_password
-        datacenters = var.vsphere_settings.datacenter
-      }
-      workspace {
-        server            = var.vsphere_settings.server_url
-        folder            = "kubernetes_${lower(var.cluster_name)}"
-        default_datastore = var.vsphere_settings.datastore
-        datacenter        = var.vsphere_settings.datacenter
-      }
-    }
+    max_unavailable_worker       = "20%"
   }
 }
 
@@ -169,6 +147,7 @@ resource "null_resource" "dependency_setter" {
 */
 
 // Deploy argo-cd to any non-management clusters
+/*
 module "argocd-deploy" {
   source = "../argocd"
 
@@ -189,3 +168,4 @@ module "argocd-deploy" {
   dependencies = length(null_resource.cluster_import) > 0 ? [null_resource.cluster_import[0].id,] : ["",]
 
 }
+*/
