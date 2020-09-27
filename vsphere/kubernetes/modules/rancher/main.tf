@@ -1,8 +1,3 @@
-data "helm_repository" "rancher" {
-  name = "latest"
-  url  = "https://releases.rancher.com/server-charts/latest"
-}
-
 resource "kubernetes_namespace" "cattle-system" {
   lifecycle {
     ignore_changes = [
@@ -49,8 +44,10 @@ resource "kubernetes_secret" "ca-secrets" {
 
 resource "helm_release" "rancher" {
   name       = "rancher"
-  repository = data.helm_repository.rancher.metadata[0].name
+  repository = "https://releases.rancher.com/server-charts/stable"
   chart      = "rancher"
+  version    = "2.4.8"
+  verify     = false
   namespace  = "cattle-system"
   set {
     name  = "hostname"

@@ -1,28 +1,28 @@
+# Optional CRD installation for those without Helm hooks
 installCRDs: false
 
+## Dex
 dex:
   enabled: false
 
+## Redis
+redis:
+  enabled: true
+
+# This key configures Redis-HA subchart and when enabled (redis-ha.enabled=true)
+# the custom redis deployment is omitted
+redis-ha:
+  enabled: false
+
+
+## Server
 server:
+  ingress:
+    enabled: false
 
-  ingress: 
-    enabled: true
-    annotations: 
-      # This annotations adds should be replaced with "ssl-passthrough" to allow both gRPC/HTTPS.
-      nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-      # This annotations allows both gRPC/HTTPS on the same ingress but requires 
-      # "--enable-ssl-passthrough" to be added to the running nginx ingress controller.
-      # nginx.ingress.kubernetes.io/ssl-passthrough: true
-    hosts:
-      - argo.${cluster_name}.k8s.littleglitch.com
-    paths:
-      - /
-    tls:
-      - hosts:
-        - argo.${cluster_name}.k8s.littleglitch.com
-
+  ## ArgoCD config
+  ## reference https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/argocd-cm.yaml
   config:
-    url: argo.${cluster_name}.k8s.littleglitch.com
     repositories: |
       - url: ${git_repository}
         passwordSecret:
@@ -31,31 +31,33 @@ server:
         usernameSecret:
           name: argocd
           key: username
+
   additionalApplications:
   - name: bootstrap
-    namespace: ${namespace}
     project: default
+    namespace: ${namespace}
     source:
       repoURL: ${git_repository}
-      targetRevision: ${git_branch}
-      path: ${cluster_name}
+      targetRevision: HEAD
+      path: ${git_path}
       helm:
         values: |-
           cluster: ${cluster_name}
-          environment: ${environment}
           spec:
             destination:
               server: https://kubernetes.default.svc
             source:
               repoURL: ${git_repository}
-              targetRevision: ${git_branch} 
+              targetRevision: HEAD
+              path: ${git_path}
     destination:
       server: https://kubernetes.default.svc
-      namespace: ${namespace}
+      namespace: ${namespace}            
     syncPolicy:
       automated:
         prune: true
-        selfHeal: false
+      syncOptions:
+        - CreateNamespace=true
 
 repoServer:
   volumes:
@@ -67,23 +69,13 @@ repoServer:
     image: alpine:3.8
     command: [sh, -c]
     args:
-      - apk add curl &&
-        wget -qO- https://get.helm.sh/helm-v3.1.1-linux-amd64.tar.gz | tar -xvzf - &&
-        mv linux-amd64/helm /custom-tools/helm-v3 &&
-        wget -qO- https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz | tar -xvzf - &&
-        mv linux-amd64/helm /custom-tools/helm-v2 &&
-        curl https://gist.githubusercontent.com/cldmnky/da87b8d555c951251b503c668dab2248/raw/6e6f8e302ff1116300877f294f08f97b9cf495ac/helm-wrapper.sh > /custom-tools/helm &&
+      - wget -qO- https://get.helm.sh/helm-v3.3.4-linux-amd64.tar.gz | tar -xvzf - &&
+        mv linux-amd64/helm /custom-tools/helm &&
         chmod 777 /custom-tools/helm
     volumeMounts:
       - mountPath: /custom-tools
         name: custom-tools
   volumeMounts:
-  - mountPath: /usr/local/bin/helm-v2
-    name: custom-tools
-    subPath: helm-v2
-  - mountPath: /usr/local/bin/helm-v3
-    name: custom-tools
-    subPath: helm-v3
   - mountPath: /usr/local/bin/helm
     name: custom-tools
     subPath: helm

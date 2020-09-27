@@ -147,7 +147,7 @@ resource "null_resource" "dependency_setter" {
 */
 
 // Deploy argo-cd to any non-management clusters
-/*
+
 module "argocd-deploy" {
   source = "../argocd"
 
@@ -168,4 +168,4 @@ module "argocd-deploy" {
   dependencies = length(null_resource.cluster_import) > 0 ? [null_resource.cluster_import[0].id,] : ["",]
 
 }
-*/
+

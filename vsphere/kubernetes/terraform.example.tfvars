@@ -1,7 +1,7 @@
 
-kubernetes_version = "v1.15.9-rancher1-1"
+kubernetes_version = "v1.18.6-rancher1-1"
 
-vsphere = {
+vsphere_settings = {
   server_url = ""
   datacenter = ""
   cluster    = ""
@@ -50,20 +50,18 @@ management_api = {
 }
 
 argocd_settings = {
-  namespace                 = "argocd"
-  environment               = "production"
+  namespace                 = "argocd-system"
   git_username              = ""
   git_password              = ""
-  git_repository            = ""
-  git_path                  = "bootstrap"
-  git_branch                = "master"
+  git_repository            = "https://github.com/example/argocd.git"
+  git_path                  = "clusters/management"
 }
 
 // Management cluster settings
 cluster_settings_management = {
   nodes = {
     k8s-mgmt-cont-01 = {
-      address   = "10.0.0.21"
+      address   = "10.0.0.211"
       netmask   = "24"
       gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
@@ -73,7 +71,7 @@ cluster_settings_management = {
       role      = ["controlplane", "worker", "etcd"]
     }
     k8s-mgmt-cont-02 = {
-      address   = "10.0.0.22"
+      address   = "10.0.0.212"
       netmask   = "24"
       gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
@@ -83,7 +81,7 @@ cluster_settings_management = {
       role      = ["controlplane", "worker", "etcd"]
     }
     k8s-mgmt-cont-03 = {
-      address   = "10.0.0.23"
+      address   = "10.0.0.213"
       netmask   = "24"
       gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
@@ -100,7 +98,7 @@ cluster_settings_management = {
 cluster_settings_private = {
   nodes = {
     k8s-private-cont-01 = {
-      address   = "10.0.0.25"
+      address   = "10.0.0.221"
       netmask   = "24"
       gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
@@ -110,7 +108,7 @@ cluster_settings_private = {
       role      = ["controlplane", "worker", "etcd"]
     }
     k8s-private-cont-02 = {
-      address   = "10.0.0.26"
+      address   = "10.0.0.222"
       netmask   = "24"
       gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
@@ -120,7 +118,7 @@ cluster_settings_private = {
       role      = ["controlplane", "worker", "etcd"]
     }
     k8s-private-cont-03 = {
-      address   = "10.0.0.27"
+      address   = "10.0.0.223"
       netmask   = "24"
       gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
@@ -130,7 +128,7 @@ cluster_settings_private = {
       role      = ["controlplane", "worker", "etcd"]
     }
     k8s-private-work-01 = {
-      address   = "10.0.0.28"
+      address   = "10.0.0.224"
       netmask   = "24"
       gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
@@ -149,7 +147,7 @@ cluster_settings_private = {
 cluster_settings_public = {
   nodes = {
     k8s-public-cont-01 = {
-      address   = "10.0.0.29"
+      address   = "10.0.0.231"
       netmask   = "24"
       gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
@@ -159,7 +157,7 @@ cluster_settings_public = {
       role      = ["controlplane", "worker", "etcd"]
     }
     k8s-public-cont-02 = {
-      address   = "10.40.0.250"
+      address   = "10.40.0.232"
       netmask   = "24"
       gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
@@ -169,7 +167,7 @@ cluster_settings_public = {
       role      = ["controlplane", "worker", "etcd"]
     }
     k8s-public-cont-03 = {
-      address   = "10.40.0.251"
+      address   = "10.40.0.233"
       netmask   = "24"
       gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
@@ -179,7 +177,7 @@ cluster_settings_public = {
       role      = ["controlplane", "worker", "etcd"]
     }
     k8s-public-work-01 = {
-      address   = "10.40.0.252"
+      address   = "10.40.0.234"
       netmask   = "24"
       gateway   = "10.0.0.254"
       dns       = ["10.0.0.10", "10.0.0.11"]
